@@ -52,6 +52,8 @@ class Vcs(root: String = "") {
             .forEach(Path::createFile)
     }
 
+    fun resolve(path: String): Path = root.resolve(path)
+
     fun config(username: String) = configFile.writeText(username)
 
     fun add(file: String) {

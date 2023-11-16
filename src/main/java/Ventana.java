@@ -16,7 +16,7 @@ public class Ventana extends JFrame {
 
     Vcs vcs = new Vcs("");
     String root;
-    String user="VCS User";
+    String user = "VCS User";
 
     JTextArea textArea = new JTextArea();
     JScrollPane scrollPane = new JScrollPane(textArea);
@@ -39,7 +39,7 @@ public class Ventana extends JFrame {
     JButton helpButton = new JButton("Help");
 
 
-    public Ventana(){
+    public Ventana() {
         setTitle("Control de Versiones");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 600);
@@ -57,16 +57,18 @@ public class Ventana extends JFrame {
         styleFilenameLabel();
         add(scrollPane, BorderLayout.CENTER);
         add(filenameJLabel, BorderLayout.NORTH);
-        addButtons(vcsButton,createButton,openButton,addButton,commitButton,logButton,checkoutButton,configButton,helpButton);
+        addButtons(vcsButton, createButton, openButton, addButton, commitButton, logButton, checkoutButton, configButton, helpButton);
         addRightPanel();
         addActionListener();
     }
+
     public void styleFilenameLabel() {
         filenameJLabel.setHorizontalAlignment(SwingConstants.CENTER); // Centrar texto
         filenameJLabel.setFont(new Font("Verdana", Font.BOLD, 16)); // Cambiar fuente y tamaño
         filenameJLabel.setForeground(new Color(60, 63, 65)); // Cambiar color del texto
         filenameJLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // Añadir un poco de espacio alrededor del texto
     }
+
     public void addRightPanel() {
         rightPanel.setPreferredSize(new Dimension(200, getHeight()));
         rightPanel.add(new JScrollPane(rightTextArea), BorderLayout.CENTER);
@@ -80,7 +82,7 @@ public class Ventana extends JFrame {
         add(rightPanel, BorderLayout.EAST);
     }
 
-    public void addButtons(JButton... buttons){
+    public void addButtons(JButton... buttons) {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.add(Box.createHorizontalGlue());
@@ -100,94 +102,68 @@ public class Ventana extends JFrame {
         button.setPreferredSize(new Dimension(100, 40)); // Tamaño de botón
         button.setFont(new Font("Arial", Font.BOLD, 12)); // Fuente y tamaño de letra
     }
-    public void addActionListener(){
-        vcsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Solo permitir selección de directorios
-                int result = fileChooser.showOpenDialog(Ventana.this);
 
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    root = fileChooser.getSelectedFile().getAbsolutePath();
-                    vcs = new Vcs(root); // Reinicializar Vcs con la nueva ruta root
-                    JOptionPane.showMessageDialog(Ventana.this, "Directorio seleccionado: " + root);
-                }
-            }
-        });
-        configButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                user = JOptionPane.showInputDialog("Enter username");
-                vcs.config(user);
-            }
-        });
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                textArea.setEditable(true);
-                openFileAndDisplay();
-            }
-        });
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                vcs.add(filenameJLabel.getText());
-                JOptionPane.showMessageDialog(null, filenameJLabel.getText() + " ha sido agregado");
+    public void addActionListener() {
+        vcsButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Solo permitir selección de directorios
+            int result = fileChooser.showOpenDialog(Ventana.this);
 
+            if (result == JFileChooser.APPROVE_OPTION) {
+                root = fileChooser.getSelectedFile().getAbsolutePath();
+                vcs = new Vcs(root); // Reinicializar Vcs con la nueva ruta root
+                JOptionPane.showMessageDialog(Ventana.this, "Directorio seleccionado: " + root);
             }
         });
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                textArea.setEditable(true);
-                String testFile = JOptionPane.showInputDialog("Ingresa el nombre del archivo");
-                filenameJLabel.setText(testFile);
-                Path testPath = Path.of(testFile);
-                try {
-                    Files.writeString(testPath, "");
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
+        configButton.addActionListener(e -> {
+            user = JOptionPane.showInputDialog("Enter username");
+            vcs.config(user);
         });
-        commitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Path testPath = Path.of(filenameJLabel.getText());
-                String content = textArea.getText();
-                try {
-                    Files.writeString(testPath, content);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                String message = "Commit " + vcs.getCommits().size();
-                vcs.commit(message);
-                JOptionPane.showMessageDialog(null,"Commit realizado");
-            }
+        openButton.addActionListener(e -> {
+            textArea.setEditable(true);
+            openFileAndDisplay();
         });
-        logButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                rightTextArea.setText(vcs.getLog());
+        addButton.addActionListener(e -> {
+            vcs.add(filenameJLabel.getText());
+            JOptionPane.showMessageDialog(null, filenameJLabel.getText() + " ha sido agregado");
 
+        });
+        createButton.addActionListener(e -> {
+            textArea.setEditable(true);
+            String testFile = JOptionPane.showInputDialog("Ingresa el nombre del archivo");
+            filenameJLabel.setText(testFile);
+            Path testPath = Path.of(testFile);
+            try {
+                Files.writeString(testPath, "");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         });
-        helpButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                rightTextArea.setText("config: Get and set a username.\nadd: Add a file to the index.\nlog: Show commit logs.\ncommit: Save changes.\ncheckout: Restore a file."
-                );
+        commitButton.addActionListener(e -> {
+            Path testPath = vcs.resolve(filenameJLabel.getText());
+            String content = textArea.getText();
+
+            try {
+                Files.writeString(testPath, content);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
+            String message = "Commit " + vcs.getCommits().size();
+            vcs.commit(message);
+            JOptionPane.showMessageDialog(null, "Commit realizado");
+        });
+        logButton.addActionListener(e -> rightTextArea.setText(vcs.getLog()));
+        helpButton.addActionListener(e -> {
+            rightTextArea.setText("config: Get and set a username.\nadd: Add a file to the index.\nlog: Show commit logs.\ncommit: Save changes.\ncheckout: Restore a file.");
         });
     }
 
     private void openFileAndDisplay() {
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(vcs.getRoot().toFile());
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
-            try{
-                String textfile = fileChooser.getSelectedFile().getName().toString();
+            try {
+                String textfile = fileChooser.getSelectedFile().getName();
                 filenameJLabel.setText(textfile);
                 FileReader filereader = new FileReader(fileChooser.getSelectedFile());
                 BufferedReader reader = new BufferedReader(filereader);
