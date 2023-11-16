@@ -1,3 +1,4 @@
+/*
 package svcs
 
 import kotlin.io.path.*
@@ -86,3 +87,4 @@ enum class Command(val commandName: String, val description: String, val handler
         return this.commandName.padEnd(11, ' ') + this.description
     }
 }
+*/

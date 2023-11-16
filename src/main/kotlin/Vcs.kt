@@ -1,5 +1,6 @@
 package svcs
 
+import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.security.MessageDigest
 import kotlin.io.path.*
@@ -53,27 +54,28 @@ class Vcs(root: String = "") {
 
     fun config(username: String) = configFile.writeText(username)
 
-    fun add(file: String): Boolean {
-        val path = Path(file).toAbsolutePath()
-        print(path)
-
-        if (path.toAbsolutePath().let { !it.exists() || !it.startsWith(root) })
-            return false
+    fun add(file: String) {
+        val path = Path(file).let {
+            if (!it.isAbsolute)
+                root.resolve(it)
+            else if (!it.startsWith(root))
+                throw FileNotInRoot(it)
+            else if (!it.exists())
+                throw NoSuchFile(it)
+            else it
+        }
 
         val files = indexFile.readLines()
-
         val tracked = if (files.size == 1 && files[0].isEmpty()) mutableSetOf()
         else files.toMutableSet()
 
         tracked.add(path.toString())
         indexFile.writeText(tracked.joinToString("\n"));
-
-        return true
     }
 
-    fun commit(message: String = "No message"): Boolean {
+    fun commit(message: String = "No message") {
         if (!hasChanges(lastCommits))
-            return false
+            throw NothingToCommit()
 
         val author = when (val author = configFile.readText()) {
             "" -> "No author"
@@ -88,8 +90,6 @@ class Vcs(root: String = "") {
             "" -> logFile.writeText(commitText)
             else -> logFile.writeText("$commitText\n\n$commits")
         }
-
-        return true
     }
 
     private fun doCommit(hash: String) {
@@ -102,11 +102,11 @@ class Vcs(root: String = "") {
         }
     }
 
-    fun checkout(commit: String): Boolean {
+    fun checkout(commit: String) {
         val checkoutDir = commitDir.resolve(commit)
 
         if (!checkoutDir.exists())
-            return false
+            throw NoSuchCommit(commit)
 
         for (file in indexFile.readLines()) {
             val trackedFile = Path(file)
@@ -117,8 +117,6 @@ class Vcs(root: String = "") {
             else
                 trackedFile.toFile().deleteRecursively()
         }
-
-        return true
     }
 }
 
