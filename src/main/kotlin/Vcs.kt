@@ -55,6 +55,7 @@ class Vcs(root: String = "") {
 
     fun add(file: String): Boolean {
         val path = Path(file).toAbsolutePath()
+        print(path)
 
         if (path.toAbsolutePath().let { !it.exists() || !it.startsWith(root) })
             return false
